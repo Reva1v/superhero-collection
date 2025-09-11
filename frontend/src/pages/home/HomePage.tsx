@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './HomePage.module.css';
 import type { Superhero } from '../../types/Superhero';
@@ -10,45 +10,56 @@ const HomePage = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [searchLoading, setSearchLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+    const [debouncedQuery, setDebouncedQuery] = useState('');
 
-    const itemsPerPage = 5;
+    const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+    const abortController = useRef<AbortController | null>(null);
+
+    const itemsPerPage = 6;
 
     useEffect(() => {
-        const loadSuperheroes = async () => {
-            try {
-                await fetchSuperheroes(currentPage, searchQuery);
-            } catch (err) {
-                console.error('Error in useEffect:', err);
-            }
-        };
-
-        loadSuperheroes();
-    }, [currentPage]);
-
-    // Debounced search
-    useEffect(() => {
-        if (searchTimeout) {
-            clearTimeout(searchTimeout);
+        if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current);
         }
 
-        const timeout = setTimeout(() => {
-            setCurrentPage(1); // Reset to first page on search
-            fetchSuperheroes(1, searchQuery);
-        }, 500);
-
-        setSearchTimeout(timeout);
+        debounceTimeout.current = setTimeout(() => {
+            setDebouncedQuery(searchQuery);
+        }, 300);
 
         return () => {
-            if (timeout) clearTimeout(timeout);
+            if (debounceTimeout.current) {
+                clearTimeout(debounceTimeout.current);
+            }
         };
     }, [searchQuery]);
 
-    const fetchSuperheroes = async (page: number, search: string = '') => {
+    useEffect(() => {
+        fetchSuperheroes(currentPage, debouncedQuery);
+    }, [currentPage, debouncedQuery]);
+
+    useEffect(() => {
+        if (debouncedQuery !== searchQuery) {
+            setCurrentPage(1);
+        }
+    }, [debouncedQuery]);
+
+    const fetchSuperheroes = useCallback(async (page: number, search: string = '') => {
         try {
-            setLoading(true);
+            if (abortController.current) {
+                abortController.current.abort();
+            }
+
+            abortController.current = new AbortController();
+
+            if (!superheroes.length && !search) {
+                setLoading(true);
+            } else if (search) {
+                setSearchLoading(true);
+            }
+
             setError(null);
 
             const searchParams = new URLSearchParams({
@@ -60,7 +71,10 @@ const HomePage = () => {
                 searchParams.append('search', search.trim());
             }
 
-            const response = await fetch(`http://localhost:4000/api/superhero?${searchParams}`);
+            const response = await fetch(
+                `http://localhost:4000/api/superhero?${searchParams}`,
+                { signal: abortController.current.signal }
+            );
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -70,34 +84,48 @@ const HomePage = () => {
             setSuperheroes(data.superheroes || []);
             setTotalPages(data.totalPages || 0);
             setTotal(data.total || 0);
+
         } catch (err) {
+            if (err instanceof Error && err.name === 'AbortError') {
+                return;
+            }
+
             console.error('Error fetching superheroes:', err);
             setError(err instanceof Error ? err.message : 'Failed to fetch superheroes');
             setSuperheroes([]);
         } finally {
             setLoading(false);
+            setSearchLoading(false);
         }
-    };
+    }, [superheroes.length]);
 
-    const handlePageChange = (page: number) => {
+    const handlePageChange = useCallback((page: number) => {
         if (page >= 1 && page <= totalPages && page !== currentPage) {
             setCurrentPage(page);
         }
-    };
+    }, [currentPage, totalPages]);
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-    };
+    const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchQuery(value);
 
-    const clearSearch = () => {
+        if (value.trim()) {
+            setSearchLoading(true);
+        }
+    }, []);
+
+    const clearSearch = useCallback(() => {
         setSearchQuery('');
-    };
+        setDebouncedQuery('');
+        setCurrentPage(1);
+        setSearchLoading(false);
+    }, []);
 
-    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const handleImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
         const target = e.target as HTMLImageElement;
         target.src = '/placeholder-hero.jpg';
-        target.onerror = null; // Prevent infinite loop
-    };
+        target.onerror = null;
+    }, []);
 
     const renderPagination = () => {
         const pages = [];
@@ -180,7 +208,7 @@ const HomePage = () => {
                     <h2>Error</h2>
                     <p>{error}</p>
                     <button
-                        onClick={() => fetchSuperheroes(currentPage, searchQuery)}
+                        onClick={() => fetchSuperheroes(currentPage, debouncedQuery)}
                         className={styles.retryBtn}
                     >
                         Try Again
@@ -193,13 +221,13 @@ const HomePage = () => {
     return (
         <div className={styles.homePage}>
             <header className={styles.pageHeader}>
-                <h1>🦸‍♂️ Superhero Database</h1>
+                <h1>Superhero Database</h1>
                 <Link to="/create" className={styles.createBtn}>
                     + Add New Superhero
                 </Link>
             </header>
 
-            {/* Search Bar */}
+            {/* Search Bar с индикатором загрузки */}
             <div className={styles.searchSection}>
                 <div className={styles.searchBar}>
                     <input
@@ -209,19 +237,24 @@ const HomePage = () => {
                         onChange={handleSearchChange}
                         className={styles.searchInput}
                     />
-                    {searchQuery && (
-                        <button
-                            onClick={clearSearch}
-                            className={styles.clearSearch}
-                            aria-label="Clear search"
-                        >
-                            ✕
-                        </button>
-                    )}
+                    <div className={styles.searchActions}>
+                        {searchLoading && (
+                            <div className={styles.searchSpinner}></div>
+                        )}
+                        {searchQuery && (
+                            <button
+                                onClick={clearSearch}
+                                className={styles.clearSearch}
+                                aria-label="Clear search"
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
                 </div>
-                {searchQuery && (
+                {debouncedQuery && (
                     <p className={styles.searchInfo}>
-                        Search results for "{searchQuery}"
+                        Search results for "{debouncedQuery}"
                     </p>
                 )}
             </div>
@@ -238,10 +271,10 @@ const HomePage = () => {
             <div className={styles.superheroesGrid}>
                 {superheroes.length === 0 ? (
                     <div className={styles.noData}>
-                        {searchQuery ? (
+                        {debouncedQuery ? (
                             <>
                                 <h3>🔍 No Results Found</h3>
-                                <p>No superheroes found matching "{searchQuery}"</p>
+                                <p>No superheroes found matching "{debouncedQuery}"</p>
                                 <button
                                     onClick={clearSearch}
                                     className={styles.clearSearchBtn}
@@ -251,7 +284,7 @@ const HomePage = () => {
                             </>
                         ) : (
                             <>
-                                <h3>🦸‍♂️ No Superheroes Yet</h3>
+                                <h3>No Superheroes Yet</h3>
                                 <p>Be the first to create a superhero!</p>
                                 <Link to="/create" className={styles.createLink}>
                                     Create Your First Superhero
