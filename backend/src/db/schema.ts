@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import {pgTable, serial, varchar, text, timestamp, integer} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Таблица супергероев
@@ -16,12 +16,11 @@ export const superheroes = pgTable('superheroes', {
 // Таблица изображений супергероев
 export const superheroImages = pgTable('superhero_images', {
     id: serial('id').primaryKey(),
-    superheroId: serial('superhero_id').references(() => superheroes.id, {
+    superheroId: integer('superhero_id').references(() => superheroes.id, {
         onDelete: 'cascade'
     }).notNull(),
     imageUrl: varchar('image_url', { length: 500 }).notNull(),
     altText: varchar('alt_text', { length: 200 }),
-    isPrimary: boolean('is_primary').default(false).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
