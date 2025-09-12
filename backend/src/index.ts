@@ -11,6 +11,17 @@ app.use(express.json({ limit: '10mb' }));
 
 app.use("/api/superhero", superheroRouter);
 
+app.use('/uploads', express.static('uploads', {
+    maxAge: '1y',
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, path) => {
+        if (path.endsWith('.webp') || path.endsWith('.jpg') || path.endsWith('.png')) {
+            res.set('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+    }
+}));
+
 app.get("/", (req: Request, res: Response) => {
     res.json({
         message: "Superhero API is running!",
