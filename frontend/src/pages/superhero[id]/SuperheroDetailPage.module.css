@@ -3,28 +3,6 @@
     background: linear-gradient(135deg, var(--bg) 0%, var(--bg-light) 100%);
 }
 
-
-.backButton {
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--text);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-}
-
-.backButton:hover {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateX(-4px);
-}
-
 .heroTitle h1 {
     margin: 0;
     font-size: 3rem;
@@ -396,6 +374,10 @@
         grid-template-columns: 1fr;
         gap: var(--spacing-xl);
         padding: var(--spacing-md);
+    }
+
+    .imageSection{
+        position: unset;
     }
 
     .actionButtons {
