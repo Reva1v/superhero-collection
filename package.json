@@ -10,8 +10,7 @@
     "dev:frontend": "npm --workspace frontend run dev",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:watch": "jest --watch"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -22,12 +21,5 @@
     "@types/jest": "^29.5.0",
     "@types/supertest": "^6.0.0",
     "ts-jest": "^29.1.0"
-  },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "multer": "^2.0.2",
-    "pg": "^8.16.3",
-    "sharp": "^0.34.3",
-    "zod": "^4.1.7"
   }
 }
