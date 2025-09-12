@@ -1,10 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import {useParams, useNavigate} from 'react-router-dom';
-import ImageUpload from '../../components/ImageUpload/ImageUpload';
 import styles from './EditSuperheroPage.module.css';
 import type {Superhero} from "../../types/Superhero.ts";
 import PageHeader from "../../components/PageHeader/PageHeader.tsx";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal/ConfirmDeleteModal.tsx";
+import SuperheroEditForm from "../../components/SuperheroEditForm/SuperheroEditForm.tsx";
+import ImageManager from "../../components/ImageManager/ImageManager.tsx";
+import EditFormActions from "../../components/EditFormActions/EditFormActions.tsx";
 
 const EditSuperheroPage = () => {
     const {id} = useParams<{ id: string }>();
@@ -29,6 +31,8 @@ const EditSuperheroPage = () => {
     const [hasChanges, setHasChanges] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [imagesToDelete, setImagesToDelete] = useState<number[]>([]);
+    const [previewImages, setPreviewImages] = useState<string[]>([]);
 
     useEffect(() => {
         if (!id) {
@@ -41,7 +45,6 @@ const EditSuperheroPage = () => {
     }, [id]);
 
     useEffect(() => {
-        // Проверяем, есть ли изменения в форме
         if (originalHero) {
             const hasFormChanges =
                 formData.nickname !== originalHero.nickname ||
@@ -53,11 +56,19 @@ const EditSuperheroPage = () => {
             const hasImageChanges =
                 newImages.length > 0 ||
                 newImageUrls.length > 0 ||
-                !keepExistingImages;
+                !keepExistingImages ||
+                imagesToDelete.length > 0;
 
             setHasChanges(hasFormChanges || hasImageChanges);
         }
-    }, [formData, originalHero, newImages, newImageUrls, keepExistingImages]);
+    }, [formData, originalHero, newImages, newImageUrls, keepExistingImages, imagesToDelete]);
+
+
+    useEffect(() => {
+        if (originalHero) {
+            setPreviewImages(originalHero.images || []);
+        }
+    }, [originalHero]);
 
     const fetchSuperhero = async (heroId: number) => {
         try {
@@ -112,6 +123,27 @@ const EditSuperheroPage = () => {
         setError(null);
 
         try {
+            if (imagesToDelete.length > 0) {
+                console.log('Deleting marked images:', imagesToDelete);
+
+                const sortedIndices = [...imagesToDelete].sort((a, b) => b - a);
+
+                for (const imageIndex of sortedIndices) {
+                    try {
+                        const deleteResponse = await fetch(`http://localhost:4000/api/superhero/${id}/images/${imageIndex}`, {
+                            method: 'DELETE',
+                        });
+
+                        if (!deleteResponse.ok) {
+                            const errorData = await deleteResponse.json();
+                            console.error(`Failed to delete image ${imageIndex}:`, errorData);
+                        }
+                    } catch (deleteError) {
+                        console.error(`Error deleting image ${imageIndex}:`, deleteError);
+                    }
+                }
+            }
+
             const form = new FormData();
 
             Object.entries(formData).forEach(([key, value]) => {
@@ -149,6 +181,58 @@ const EditSuperheroPage = () => {
         }
     };
 
+
+    const handleMarkImageForDeletion = (imageIndex: number) => {
+        const confirmMark = window.confirm(
+            `Mark this image for deletion? It will be removed when you save changes.`
+        );
+
+        if (!confirmMark) return;
+
+        // Добавляем индекс в список для удаления
+        if (!imagesToDelete.includes(imageIndex)) {
+            setImagesToDelete(prev => [...prev, imageIndex]);
+        }
+
+        // Обновляем превью изображений (убираем из отображения)
+        const updatedPreview = previewImages.filter((_, index) =>
+            !imagesToDelete.includes(index) && index !== imageIndex
+        );
+        setPreviewImages(updatedPreview);
+    };
+
+    const handleRestoreImage = (originalIndex: number) => {
+        setImagesToDelete(prev => prev.filter(index => index !== originalIndex));
+
+        if (originalHero?.images && originalHero.images[originalIndex]) {
+            setPreviewImages(prev => {
+                const restored = [...prev];
+                restored.splice(originalIndex, 0, originalHero.images[originalIndex]);
+                return restored;
+            });
+        }
+    };
+
+    const handleRestoreAllImages = () => {
+        setImagesToDelete([]);
+        setPreviewImages(originalHero?.images || []);
+    };
+
+    const handleMarkAllImagesForDeletion = () => {
+        if (previewImages.length === 0) return;
+
+        const confirmMarkAll = window.confirm(
+            `Mark all ${previewImages.length} images for deletion? They will be removed when you save changes.`
+        );
+
+        if (!confirmMarkAll) return;
+
+        // Помечаем все существующие изображения для удаления
+        const allIndices = Array.from({length: existingImages.length}, (_, i) => i);
+        setImagesToDelete(allIndices);
+        setPreviewImages([]);
+    };
+
     const handleDelete = async () => {
         if (!originalHero) return;
 
@@ -165,7 +249,6 @@ const EditSuperheroPage = () => {
                 throw new Error(errorData.error || `Failed to delete superhero: ${response.status}`);
             }
 
-            // Успешное удаление - перенаправляем на главную
             navigate('/', {
                 state: {
                     message: `${originalHero.nickname} has been deleted successfully`,
@@ -179,14 +262,6 @@ const EditSuperheroPage = () => {
             setDeleting(false);
             setShowDeleteConfirm(false);
         }
-    };
-
-    const confirmDelete = () => {
-        setShowDeleteConfirm(true);
-    };
-
-    const cancelDelete = () => {
-        setShowDeleteConfirm(false);
     };
 
     const handleCancel = () => {
@@ -211,6 +286,9 @@ const EditSuperheroPage = () => {
             setNewImages([]);
             setNewImageUrls([]);
             setKeepExistingImages(true);
+
+            setImagesToDelete([]);
+            setPreviewImages(originalHero.images || []);
         }
     };
 
@@ -246,7 +324,6 @@ const EditSuperheroPage = () => {
 
     return (
         <div className={styles.editPage}>
-            {/* Header */}
             <PageHeader
                 title="Edit Superhero"
                 subtitle={originalHero ? `Update information for ${originalHero.nickname}` : 'Loading...'}
@@ -256,172 +333,44 @@ const EditSuperheroPage = () => {
                 onBackClick={handleCancel}
             />
 
-            {/* Form */}
             <div className={styles.formContainer}>
                 <form onSubmit={handleSubmit} className={styles.form}>
-                    {/* Basic Information */}
-                    <div className={styles.section}>
-                        <h2>📝 Basic Information</h2>
+                    <SuperheroEditForm
+                        formData={formData}
+                        onChange={handleChange}
+                        disabled={saving || deleting}
+                    />
 
-                        <div className={styles.formRow}>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="nickname">Superhero Nickname *</label>
-                                <input
-                                    id="nickname"
-                                    name="nickname"
-                                    type="text"
-                                    placeholder="e.g., Iron Man, Superman"
-                                    value={formData.nickname}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
+                    <ImageManager
+                        existingImages={existingImages}
+                        previewImages={previewImages}
+                        imagesToDelete={imagesToDelete}
+                        keepExistingImages={keepExistingImages}
+                        heroName={originalHero?.nickname}
+                        onMarkImageForDeletion={handleMarkImageForDeletion}
+                        onMarkAllImagesForDeletion={handleMarkAllImagesForDeletion}
+                        onRestoreImage={handleRestoreImage}
+                        onRestoreAllImages={handleRestoreAllImages}
+                        onImagesChange={handleImagesChange}
+                        onKeepExistingChange={setKeepExistingImages}
+                        disabled={saving || deleting}
+                    />
 
-                            <div className={styles.formGroup}>
-                                <label htmlFor="realName">Real Name *</label>
-                                <input
-                                    id="realName"
-                                    name="realName"
-                                    type="text"
-                                    placeholder="e.g., Tony Stark, Clark Kent"
-                                    value={formData.realName}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="catchPhrase">Catch Phrase *</label>
-                            <input
-                                id="catchPhrase"
-                                name="catchPhrase"
-                                type="text"
-                                placeholder="e.g., 'I am Iron Man!'"
-                                value={formData.catchPhrase}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="originDescription">Origin Story *</label>
-                            <textarea
-                                id="originDescription"
-                                name="originDescription"
-                                placeholder="Describe how this superhero got their powers..."
-                                value={formData.originDescription}
-                                onChange={handleChange}
-                                rows={4}
-                                required
-                            />
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="superpowers">Superpowers *</label>
-                            <textarea
-                                id="superpowers"
-                                name="superpowers"
-                                placeholder="List their superpowers: flight, super strength, telepathy..."
-                                value={formData.superpowers}
-                                onChange={handleChange}
-                                rows={3}
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    {/* Existing Images */}
-                    {existingImages.length > 0 && (
-                        <div className={styles.section}>
-                            <h2>🖼️ Current Images</h2>
-                            <div className={styles.existingImages}>
-                                {existingImages.map((image, index) => (
-                                    <div key={index} className={styles.existingImage}>
-                                        <img
-                                            src={image.startsWith('http') ? image : `http://localhost:4000${image}`}
-                                            alt={`${originalHero?.nickname} ${index + 1}`}
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                target.src = '/placeholder-hero.jpg';
-                                                target.onerror = null;
-                                            }}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className={styles.imageOptions}>
-                                <label className={styles.checkboxLabel}>
-                                    <input
-                                        type="checkbox"
-                                        checked={keepExistingImages}
-                                        onChange={(e) => setKeepExistingImages(e.target.checked)}
-                                    />
-                                    <span className={styles.checkmark}></span>
-                                    Keep existing images
-                                </label>
-                                <p className={styles.imageNote}>
-                                    {keepExistingImages
-                                        ? "New images will be added to existing ones"
-                                        : "Existing images will be replaced with new ones"}
-                                </p>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* New Images */}
-                    <div className={styles.section}>
-                        <h2>📷 Add New Images</h2>
-                        <ImageUpload onImagesChange={handleImagesChange} maxFiles={5}/>
-                    </div>
-
-                    {/* Error Display */}
                     {error && (
                         <div className={styles.error}>
                             ❌ {error}
                         </div>
                     )}
 
-                    {/* Form Actions */}
-                    <div className={styles.formActions}>
-                        <div className={styles.leftActions}>
-                            <button
-                                type="button"
-                                onClick={confirmDelete}
-                                className={styles.deleteBtn}
-                                disabled={saving || deleting}
-                            >
-                                {deleting ? '🗑️ Deleting...' : '🗑️ Delete Hero'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleReset}
-                                className={styles.resetBtn}
-                                disabled={saving || deleting || !hasChanges}
-                            >
-                                🔄 Reset Changes
-                            </button>
-                        </div>
-
-                        <div className={styles.rightActions}>
-                            <button
-                                type="button"
-                                onClick={handleCancel}
-                                className={styles.cancelBtn}
-                                disabled={saving || deleting}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={saving || deleting || !hasChanges}
-                                className={styles.saveBtn}
-                            >
-                                {saving ? '💾 Saving...' : hasChanges ? '💾 Save Changes' : '✅ No Changes'}
-                            </button>
-                        </div>
-                    </div>
+                    <EditFormActions
+                        onDelete={() => setShowDeleteConfirm(true)}
+                        onReset={handleReset}
+                        onCancel={handleCancel}
+                        onSubmit={handleSubmit}
+                        hasChanges={hasChanges}
+                        saving={saving}
+                        deleting={deleting}
+                    />
 
                     <ConfirmDeleteModal
                         isOpen={showDeleteConfirm}
@@ -437,12 +386,11 @@ const EditSuperheroPage = () => {
                         itemSubtitle={originalHero?.realName}
                         itemQuote={originalHero?.catchPhrase}
                         onConfirm={handleDelete}
-                        onCancel={cancelDelete}
+                        onCancel={() => setShowDeleteConfirm(false)}
                         isDeleting={deleting}
                         customWarning="This action cannot be undone. All hero data and images will be permanently removed."
                     />
 
-                    {/* Changes Indicator */}
                     {hasChanges && (
                         <div className={styles.changesIndicator}>
                             <span>📝</span>
