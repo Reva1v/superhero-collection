@@ -4,40 +4,49 @@ import { eq, desc, sql } from "drizzle-orm";
 
 export class SuperheroService {
     async getAll(page: number = 1, limit: number = 5) {
-        const offset = (page - 1) * limit;
-
         try {
-            const [heroes, totalCount] = await Promise.all([
-                db.query.superheroes.findMany({
-                    limit,
-                    offset,
-                    orderBy: [desc(superheroes.createdAt)],
-                    with: {
-                        images: true,
-                    },
-                }),
+            page = Math.max(1, page);
+            limit = Math.max(1, Math.min(50, limit));
 
-                db
-                    .select({ count: sql<number>`count(*)` })
-                    .from(superheroes)
-                    .then(result => Number(result[0].count))
-            ]);
+            const offset = (page - 1) * limit;
 
-            const heroesFormatted = heroes.map(hero => ({
-                ...hero,
-                images: hero.images.map(img => img.imageUrl),
-            }));
+            const heroes = await db
+                .select()
+                .from(superheroes)
+                .limit(limit)
+                .offset(offset);
+
+            const totalResult = await db
+                .select({ count: sql<number>`count(*)::int` })
+                .from(superheroes);
+
+            const total = Number(totalResult[0]?.count) || 0;
+            const totalPages = Math.ceil(total / limit);
+
+            const heroesWithImages = await Promise.all(
+                heroes.map(async (hero) => {
+                    const images = await db
+                        .select()
+                        .from(superheroImages)
+                        .where(eq(superheroImages.superheroId, hero.id));
+
+                    return {
+                        ...hero,
+                        images: images.map(img => img.imageUrl)
+                    };
+                })
+            );
 
             return {
-                superheroes: heroesFormatted,
-                total: totalCount,
-                page,
-                limit,
-                totalPages: Math.ceil(totalCount / limit),
+                superheroes: heroesWithImages,
+                total,
+                totalPages,
+                currentPage: page,
+                limit
             };
         } catch (error) {
-            console.error("Error in getAll:", error);
-            throw new Error("Failed to fetch superheroes");
+            console.error('Error in SuperheroService.getAll:', error);
+            throw error;
         }
     }
 
@@ -217,6 +226,68 @@ export class SuperheroService {
             throw new Error("Failed to remove image");
         }
     }
+
+    async removeImageByIndex(superheroId: number, imageIndex: number) {
+        try {
+            const images = await db
+                .select()
+                .from(superheroImages)
+                .where(eq(superheroImages.superheroId, superheroId))
+                .orderBy(superheroImages.id);
+
+            if (imageIndex < 0 || imageIndex >= images.length) {
+                throw new Error('Invalid image index');
+            }
+
+            const imageToDelete = images[imageIndex];
+            const [deletedImage] = await db
+                .delete(superheroImages)
+                .where(eq(superheroImages.id, imageToDelete.id))
+                .returning();
+
+            return deletedImage;
+        } catch (error) {
+            console.error("Error in removeImageByIndex:", error);
+            throw new Error("Failed to remove image by index");
+        }
+    }
+
+    async clearAllImages(superheroId: number) {
+        try {
+            const deletedImages = await db
+                .delete(superheroImages)
+                .where(eq(superheroImages.superheroId, superheroId))
+                .returning();
+
+            return deletedImages;
+        } catch (error) {
+            console.error("Error in clearAllImages:", error);
+            throw new Error("Failed to clear all images");
+        }
+    }
+
+    async addMultipleImages(superheroId: number, imageUrls: string[], altText?: string) {
+        try {
+            if (imageUrls.length === 0) return [];
+
+            const imageRecords = imageUrls.map(imageUrl => ({
+                superheroId,
+                imageUrl,
+                altText: altText || `Image of superhero ${superheroId}`,
+            }));
+
+            const newImages = await db
+                .insert(superheroImages)
+                .values(imageRecords)
+                .returning();
+
+            return newImages;
+        } catch (error) {
+            console.error("Error in addMultipleImages:", error);
+            throw new Error("Failed to add multiple images");
+        }
+    }
+
 
     async getStats() {
         try {
