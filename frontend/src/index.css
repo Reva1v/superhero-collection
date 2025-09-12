@@ -126,32 +126,6 @@ h1 { font-size: 2.5rem; }
 h2 { font-size: 2rem; }
 h3 { font-size: 1.5rem; }
 
-/* Кнопки */
-button {
-  border-radius: var(--border-radius);
-  border: 1px solid var(--border);
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-size: 1rem;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: var(--bg-card);
-  color: var(--text);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-button:hover {
-  border-color: var(--border-focus);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-button:focus,
-button:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
-}
-
 a {
   color: var(--primary);
   text-decoration: none;
