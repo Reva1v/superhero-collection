@@ -1,11 +1,11 @@
 // import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/home/HomePage.tsx';
-// import CreateHero from './pages/CreateHero/CreateHero';
-// import HeroDetails from './pages/HeroDetails/HeroDetails';
+import CreatePage from './pages/create/CreatePage.tsx';
 // import EditHero from './pages/EditHero/EditHero';
 import './App.css';
 import Layout from "./components/Layout/Layout.tsx";
+import SuperheroDetailPage from "./pages/superhero[id]/SuperheroDetailPage.tsx";
 
 function App() {
     return (
@@ -13,8 +13,8 @@ function App() {
             <Layout>
                 <Routes>
                     <Route path="/" element={<HomePage />} />
-                    {/*<Route path="/create" element={<CreateHero />} />*/}
-                    {/*<Route path="/superhero/:id" element={<HeroDetails />} />*/}
+                    <Route path="/create" element={<CreatePage />} />
+                    <Route path="/superhero/:id" element={<SuperheroDetailPage />} />
                     {/*<Route path="/edit/:id" element={<EditHero />} />*/}
                     <Route path="*" element={<NotFound />} />
                 </Routes>
