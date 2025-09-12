@@ -52,7 +52,7 @@ html, body {
   resize: vertical;
 }
 
-/* Утилитарные классы */
+/* Utility classes */
 .text-center {
   text-align: center;
 }
@@ -71,7 +71,7 @@ html, body {
   padding: 20px;
 }
 
-/* Анимации */
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;

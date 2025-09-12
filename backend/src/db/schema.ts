@@ -1,19 +1,19 @@
 import {pgTable, serial, varchar, text, timestamp, integer} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-// Таблица супергероев
+// Superheroes table
 export const superheroes = pgTable('superheroes', {
     id: serial('id').primaryKey(),
     nickname: varchar('nickname', { length: 100 }).notNull(),
     realName: varchar('real_name', { length: 100 }).notNull(),
     originDescription: text('origin_description').notNull(),
-    superpowers: text('superpowers').notNull(), // JSON строка или разделенный запятыми список
+    superpowers: text('superpowers').notNull(), // JSON string or comma-separated list
     catchPhrase: text('catch_phrase').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-// Таблица изображений супергероев
+// Superhero images table
 export const superheroImages = pgTable('superhero_images', {
     id: serial('id').primaryKey(),
     superheroId: integer('superhero_id').references(() => superheroes.id, {
@@ -25,7 +25,7 @@ export const superheroImages = pgTable('superhero_images', {
     createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-// Определение связей
+// Relations definition
 export const superheroesRelations = relations(superheroes, ({ many }) => ({
     images: many(superheroImages),
 }));
@@ -37,15 +37,15 @@ export const superheroImagesRelations = relations(superheroImages, ({ one }) => 
     }),
 }));
 
-// Типы TypeScript (инferred от схемы)
+// TypeScript types (inferred from schema)
 export type Superhero = typeof superheroes.$inferSelect;
 export type NewSuperhero = typeof superheroes.$inferInsert;
 export type SuperheroImage = typeof superheroImages.$inferSelect;
 export type NewSuperheroImage = typeof superheroImages.$inferInsert;
 
-// Пример использования
+// Usage example
 /*
-// Создание нового супергероя
+// Create a new superhero
 const newSuperhero: NewSuperhero = {
   nickname: "Superman",
   realName: "Clark Kent",
@@ -54,14 +54,14 @@ const newSuperhero: NewSuperhero = {
   catchPhrase: "Look, up in the sky, it's a bird, it's a plane, it's Superman!"
 };
 
-// Запросы с изображениями
+// Queries with images
 const superheroWithImages = await db
   .select()
   .from(superheroes)
   .leftJoin(superheroImages, eq(superheroes.id, superheroImages.superheroId))
   .where(eq(superheroes.id, 1));
 
-// Или используя relations
+// Or using relations
 const superheroWithImages = await db.query.superheroes.findFirst({
   where: eq(superheroes.id, 1),
   with: {

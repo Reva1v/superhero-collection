@@ -136,7 +136,7 @@ a:hover {
   color: var(--primary-light);
 }
 
-/* Инпуты */
+/* Inputs */
 input, textarea, select {
   background-color: var(--bg-card);
   border: 1px solid var(--border);

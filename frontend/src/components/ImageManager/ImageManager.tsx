@@ -63,7 +63,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
                     {/* Preview Images */}
                     <div className={styles.existingImages}>
                         {previewImages.map((image, previewIndex) => {
-                            // Находим оригинальный индекс
+                            // Find original index
                             const originalIndex = existingImages.indexOf(image);
 
                             return (

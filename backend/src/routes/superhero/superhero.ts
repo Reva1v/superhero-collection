@@ -311,7 +311,7 @@ router.post("/", upload.array('images', 5), async (req: Request, res: Response) 
                     uploadedImages.push(imagePath);
                 } catch (imageError) {
                     console.error("Error processing image:", imageError);
-                    // Продолжаем с другими изображениями, но логируем ошибку
+                    // Continue with other images but log the error
                 }
             }
         }
@@ -321,7 +321,7 @@ router.post("/", upload.array('images', 5), async (req: Request, res: Response) 
             try {
                 let urls: string[] = [];
                 if (typeof imageUrls === 'string') {
-                    // Если это строка, пробуем парсить как JSON или разделить по запятым
+                    // If it's a string, try parsing as JSON or splitting by commas
                     if (imageUrls.startsWith('[')) {
                         urls = JSON.parse(imageUrls);
                     } else if (imageUrls.includes(',')) {

@@ -189,12 +189,12 @@ const EditSuperheroPage = () => {
 
         if (!confirmMark) return;
 
-        // Добавляем индекс в список для удаления
+        // Add index to the deletion list
         if (!imagesToDelete.includes(imageIndex)) {
             setImagesToDelete(prev => [...prev, imageIndex]);
         }
 
-        // Обновляем превью изображений (убираем из отображения)
+        // Update image previews (remove from display)
         const updatedPreview = previewImages.filter((_, index) =>
             !imagesToDelete.includes(index) && index !== imageIndex
         );
@@ -227,7 +227,7 @@ const EditSuperheroPage = () => {
 
         if (!confirmMarkAll) return;
 
-        // Помечаем все существующие изображения для удаления
+        // Mark all existing images for deletion
         const allIndices = Array.from({length: existingImages.length}, (_, i) => i);
         setImagesToDelete(allIndices);
         setPreviewImages([]);
