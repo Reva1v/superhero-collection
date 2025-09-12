@@ -1,0 +1,119 @@
+.notification {
+    position: fixed;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    min-width: 300px;
+    max-width: 500px;
+    z-index: 1000;
+    animation: slideInRight 0.3s ease-out;
+    border: 2px solid transparent;
+}
+
+.content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex: 1;
+}
+
+.icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.message {
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.closeButton {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-white);
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.closeButton:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Type-specific styles */
+.success {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    color: var(--text-white);
+    border-color: #1e8449;
+}
+
+.error {
+    background: linear-gradient(135deg, var(--danger), #e74c3c);
+    color: var(--text-white);
+    border-color: #c0392b;
+}
+
+.warning {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: var(--text-white);
+    border-color: #d68910;
+}
+
+.info {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: var(--text-white);
+    border-color: #2471a3;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .notification {
+        top: var(--spacing-md);
+        right: var(--spacing-md);
+        left: var(--spacing-md);
+        min-width: auto;
+        max-width: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .notification {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .message {
+        font-size: 0.9rem;
+    }
+
+    .closeButton {
+        width: 20px;
+        height: 20px;
+        font-size: 0.8rem;
+    }
+}
