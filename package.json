@@ -9,8 +9,20 @@
     "dev:backend": "npm --workspace backend run dev",
     "dev:frontend": "npm --workspace frontend run dev",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "test": "jest",
-    "test:watch": "jest --watch"
+
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:restart": "docker-compose restart",
+    "docker:build": "docker-compose build",
+    "docker:clean": "docker-compose down -v --rmi all",
+
+    "db:dev": "npm --workspace backend run devDB",
+    "db:migrate:generate": "npm --workspace backend run migrate:generate",
+    "db:migrate:apply": "npm --workspace backend run migrate:apply",
+
+    "db:migrate": "npm run db:migrate:generate && npm run db:migrate:apply",
+    "mock:db:migrate": "npm run db:migrate:generate && npm run db:migrate:apply && npm run db:dev"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
