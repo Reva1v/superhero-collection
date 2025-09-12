@@ -5,9 +5,10 @@ import styles from './ImageUpload.module.css';
 interface ImageUploadProps {
     onImagesChange: (images: File[], urls: string[]) => void;
     maxFiles?: number;
+    disabled?: boolean;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({onImagesChange, maxFiles = 5}) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({onImagesChange, maxFiles = 5, disabled = false}) => {
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
     const [imageUrls, setImageUrls] = useState<string[]>(['']);
     const [dragActive, setDragActive] = useState(false);
@@ -77,6 +78,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({onImagesChange, maxFiles = 5})
                     onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
                     className={styles.fileInput}
                     id="image-upload"
+                    disabled={disabled}
                 />
                 <label htmlFor="image-upload" className={styles.uploadLabel}>
                     <div className={styles.uploadContent}>
@@ -102,6 +104,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({onImagesChange, maxFiles = 5})
                                     type="button"
                                     onClick={() => removeFile(index)}
                                     className={styles.removeBtn}
+                                    disabled={disabled}
                                 >
                                     ✕
                                 </button>
@@ -121,12 +124,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({onImagesChange, maxFiles = 5})
                             value={url}
                             onChange={(e) => handleUrlChange(index, e.target.value)}
                             className={styles.urlField}
+                            disabled={disabled}
                         />
                         {url.trim() && (
                             <button
                                 type="button"
                                 onClick={() => removeUrl(index)}
                                 className={styles.removeUrlBtn}
+                                disabled={disabled}
                             >
                                 ✕
                             </button>
