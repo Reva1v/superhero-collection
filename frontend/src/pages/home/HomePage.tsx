@@ -4,6 +4,8 @@ import styles from './HomePage.module.css';
 import type {Superhero} from '../../types/Superhero';
 import type {SuperheroResponse} from '../../types/SuperheroResponse';
 import SuperheroCard from "../../components/SuperheroCard/SuperheroCard.tsx";
+import { useLocation } from 'react-router-dom';
+import Notification from "../../components/Notification/Notification.tsx";
 
 const HomePage = () => {
     const [superheroes, setSuperheroes] = useState<Superhero[]>([]);
@@ -15,11 +17,28 @@ const HomePage = () => {
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedQuery, setDebouncedQuery] = useState('');
-
     const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
     const abortController = useRef<AbortController | null>(null);
 
+    const location = useLocation();
+    const [notification, setNotification] = useState<{message: string; type: string} | null>(null);
+
     const itemsPerPage = 6;
+
+    useEffect(() => {
+        if (location.state?.message) {
+            setNotification({
+                message: location.state.message,
+                type: location.state.type || 'success'
+            });
+
+            window.history.replaceState({}, document.title);
+
+            setTimeout(() => {
+                setNotification(null);
+            }, 5000);
+        }
+    }, [location]);
 
     useEffect(() => {
         if (debounceTimeout.current) {
@@ -221,6 +240,14 @@ const HomePage = () => {
                     + Add New Superhero
                 </Link>
             </header>
+
+            <Notification
+                message="Superhero has been deleted successfully"
+                type="success"
+                duration={5000}
+                onClose={() => setNotification(null)}
+                isVisible={!!notification}
+            />
 
             {/* Search Bar */}
             <div className={styles.searchSection}>
