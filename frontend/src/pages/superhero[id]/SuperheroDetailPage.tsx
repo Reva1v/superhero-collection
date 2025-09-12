@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import styles from './SuperheroDetailPage.module.css';
 import type {Superhero} from "../../types/Superhero.ts";
+import PageHeader from "../../components/PageHeader/PageHeader.tsx";
 
 const SuperheroDetailPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -119,17 +120,13 @@ const SuperheroDetailPage = () => {
     return (
         <div className={styles.detailPage}>
             {/* Hero Header */}
-            <div className={styles.heroHeader}>
-                <div className={styles.headerContent}>
-                    <button onClick={() => navigate('/')} className={styles.backButton}>
-                        ← Back to Heroes
-                    </button>
-                    <div className={styles.heroTitle}>
-                        <h1>{hero.nickname}</h1>
-                        <p className={styles.realName}>{hero.realName}</p>
-                    </div>
-                </div>
-            </div>
+            <PageHeader
+                title={hero.nickname}
+                subtitle={hero.realName}
+                backButtonText="← Back to Heroes"
+                backButtonPath="/"
+                backgroundColor="primary"
+            />
 
             {/* Main Content */}
             <div className={styles.mainContent}>

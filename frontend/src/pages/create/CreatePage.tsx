@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import ImageUpload from '../../components/ImageUpload/ImageUpload';
 import styles from './CreatePage.module.css';
+import PageHeader from "../../components/PageHeader/PageHeader.tsx";
 
 const CreatePage = () => {
     const [formData, setFormData] = useState({
@@ -20,7 +21,7 @@ const CreatePage = () => {
     const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+        setFormData(prev => ({...prev, [e.target.name]: e.target.value}));
     };
 
     const handleImagesChange = (files: File[], urls: string[]) => {
@@ -71,101 +72,106 @@ const CreatePage = () => {
     };
 
     return (
-        <div className={styles.createPage}>
-            <header className={styles.header}>
-                <h1>🦸‍♂️ Add New Superhero</h1>
-                <p>Create your unique superhero with superpowers and images</p>
-            </header>
+        <>
+            <PageHeader
+                title="Add New Superhero"
+                subtitle="Create your unique superhero with superpowers and images"
+                backButtonText="← Back to Heroes"
+                backButtonPath="/"
+                backgroundColor="accent"
+                icon="🦸‍♂️"
+            />
+            <div className={styles.createPage}>
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="nickname">Superhero Nickname *</label>
+                        <input
+                            id="nickname"
+                            name="nickname"
+                            type="text"
+                            placeholder="e.g., Iron Man, Superman"
+                            value={formData.nickname}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
 
-            <form onSubmit={handleSubmit} className={styles.form}>
-                <div className={styles.formGroup}>
-                    <label htmlFor="nickname">Superhero Nickname *</label>
-                    <input
-                        id="nickname"
-                        name="nickname"
-                        type="text"
-                        placeholder="e.g., Iron Man, Superman"
-                        value={formData.nickname}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="realName">Real Name *</label>
+                        <input
+                            id="realName"
+                            name="realName"
+                            type="text"
+                            placeholder="e.g., Tony Stark, Clark Kent"
+                            value={formData.realName}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
 
-                <div className={styles.formGroup}>
-                    <label htmlFor="realName">Real Name *</label>
-                    <input
-                        id="realName"
-                        name="realName"
-                        type="text"
-                        placeholder="e.g., Tony Stark, Clark Kent"
-                        value={formData.realName}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="originDescription">Origin Story *</label>
+                        <textarea
+                            id="originDescription"
+                            name="originDescription"
+                            placeholder="Describe how this superhero got their powers..."
+                            value={formData.originDescription}
+                            onChange={handleChange}
+                            rows={4}
+                            required
+                        />
+                    </div>
 
-                <div className={styles.formGroup}>
-                    <label htmlFor="originDescription">Origin Story *</label>
-                    <textarea
-                        id="originDescription"
-                        name="originDescription"
-                        placeholder="Describe how this superhero got their powers..."
-                        value={formData.originDescription}
-                        onChange={handleChange}
-                        rows={4}
-                        required
-                    />
-                </div>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="superpowers">Superpowers *</label>
+                        <textarea
+                            id="superpowers"
+                            name="superpowers"
+                            placeholder="List their superpowers: flight, super strength, telepathy..."
+                            value={formData.superpowers}
+                            onChange={handleChange}
+                            rows={3}
+                            required
+                        />
+                    </div>
 
-                <div className={styles.formGroup}>
-                    <label htmlFor="superpowers">Superpowers *</label>
-                    <textarea
-                        id="superpowers"
-                        name="superpowers"
-                        placeholder="List their superpowers: flight, super strength, telepathy..."
-                        value={formData.superpowers}
-                        onChange={handleChange}
-                        rows={3}
-                        required
-                    />
-                </div>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="catchPhrase">Catch Phrase *</label>
+                        <input
+                            id="catchPhrase"
+                            name="catchPhrase"
+                            type="text"
+                            placeholder="e.g., 'I am Iron Man!'"
+                            value={formData.catchPhrase}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
 
-                <div className={styles.formGroup}>
-                    <label htmlFor="catchPhrase">Catch Phrase *</label>
-                    <input
-                        id="catchPhrase"
-                        name="catchPhrase"
-                        type="text"
-                        placeholder="e.g., 'I am Iron Man!'"
-                        value={formData.catchPhrase}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+                    <ImageUpload onImagesChange={handleImagesChange} maxFiles={5}/>
 
-                <ImageUpload onImagesChange={handleImagesChange} maxFiles={5} />
+                    {error && <div className={styles.error}>❌ {error}</div>}
 
-                {error && <div className={styles.error}>❌ {error}</div>}
-
-                <div className={styles.formActions}>
-                    <button
-                        type="button"
-                        onClick={() => navigate('/')}
-                        className={styles.cancelBtn}
-                        disabled={loading}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className={styles.submitButton}
-                    >
-                        {loading ? '🔄 Creating...' : '✨ Create Superhero'}
-                    </button>
-                </div>
-            </form>
-        </div>
+                    <div className={styles.formActions}>
+                        <button
+                            type="button"
+                            onClick={() => navigate('/')}
+                            className={styles.cancelBtn}
+                            disabled={loading}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={styles.submitButton}
+                        >
+                            {loading ? '🔄 Creating...' : '✨ Create Superhero'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </>
     );
 };
 

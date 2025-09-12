@@ -3,20 +3,6 @@
     background: linear-gradient(135deg, var(--bg) 0%, var(--bg-light) 100%);
 }
 
-.heroHeader {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-    color: var(--text);
-    padding: var(--spacing-xl) var(--spacing-lg);
-    box-shadow: var(--shadow-lg);
-}
-
-.headerContent {
-    max-width: var(--container-max-width);
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-lg);
-}
 
 .backButton {
     background: rgba(255, 255, 255, 0.2);
@@ -412,12 +398,6 @@
         padding: var(--spacing-md);
     }
 
-    .headerContent {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-md);
-    }
-
     .actionButtons {
         flex-direction: column;
     }
@@ -432,9 +412,6 @@
 }
 
 @media (max-width: 480px) {
-    .heroHeader {
-        padding: var(--spacing-lg) var(--spacing-md);
-    }
 
     .heroTitle h1 {
         font-size: 1.8rem;
