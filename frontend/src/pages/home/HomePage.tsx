@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
+import {Link} from 'react-router-dom';
 import styles from './HomePage.module.css';
-import type { Superhero } from '../../types/Superhero';
-import type { SuperheroResponse } from '../../types/SuperheroResponse';
+import type {Superhero} from '../../types/Superhero';
+import type {SuperheroResponse} from '../../types/SuperheroResponse';
+import SuperheroCard from "../../components/SuperheroCard/SuperheroCard.tsx";
 
 const HomePage = () => {
     const [superheroes, setSuperheroes] = useState<Superhero[]>([]);
@@ -73,7 +74,7 @@ const HomePage = () => {
 
             const response = await fetch(
                 `http://localhost:4000/api/superhero?${searchParams}`,
-                { signal: abortController.current.signal }
+                {signal: abortController.current.signal}
             );
 
             if (!response.ok) {
@@ -97,7 +98,7 @@ const HomePage = () => {
             setLoading(false);
             setSearchLoading(false);
         }
-    }, [superheroes.length]);
+    }, []);
 
     const handlePageChange = useCallback((page: number) => {
         if (page >= 1 && page <= totalPages && page !== currentPage) {
@@ -119,12 +120,6 @@ const HomePage = () => {
         setDebouncedQuery('');
         setCurrentPage(1);
         setSearchLoading(false);
-    }, []);
-
-    const handleImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-        const target = e.target as HTMLImageElement;
-        target.src = '/placeholder-hero.jpg';
-        target.onerror = null;
     }, []);
 
     const renderPagination = () => {
@@ -227,7 +222,7 @@ const HomePage = () => {
                 </Link>
             </header>
 
-            {/* Search Bar с индикатором загрузки */}
+            {/* Search Bar */}
             <div className={styles.searchSection}>
                 <div className={styles.searchBar}>
                     <input
@@ -294,29 +289,7 @@ const HomePage = () => {
                     </div>
                 ) : (
                     superheroes.map((hero) => (
-                        <div key={hero.id} className={styles.superheroCard}>
-                            <Link to={`/superhero/${hero.id}`} className={styles.cardLink}>
-                                <div className={styles.heroImage}>
-                                    {hero.images && hero.images.length > 0 ? (
-                                        <img
-                                            src={hero.images[0]}
-                                            alt={`${hero.nickname} - ${hero.realName}`}
-                                            onError={handleImageError}
-                                            loading="lazy"
-                                        />
-                                    ) : (
-                                        <div className={styles.noImage}>
-                                            <span>🦸‍♂️</span>
-                                            <p>No Image</p>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className={styles.heroInfo}>
-                                    <h3 className={styles.heroNickname}>{hero.nickname}</h3>
-                                    <p className={styles.heroRealName}>{hero.realName}</p>
-                                </div>
-                            </Link>
-                        </div>
+                        <SuperheroCard key={hero.id} hero={hero}/>
                     ))
                 )}
             </div>
