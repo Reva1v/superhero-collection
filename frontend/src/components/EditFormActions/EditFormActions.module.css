@@ -1,0 +1,123 @@
+.formActions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-lg);
+    border: 2px solid var(--border);
+    position: sticky;
+    bottom: var(--spacing-lg);
+}
+
+.leftActions,
+.rightActions {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.resetBtn,
+.cancelBtn,
+.saveBtn,
+.deleteBtn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    border: none;
+    text-decoration: none;
+}
+
+.deleteBtn {
+    background: linear-gradient(45deg, var(--danger), #c0392b);
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+.deleteBtn:hover:not(:disabled) {
+    background: linear-gradient(45deg, #c0392b, #a93226);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
+.resetBtn {
+    background: var(--text-muted);
+    color: var(--text);
+}
+
+.resetBtn:hover:not(:disabled) {
+    background: var(--text);
+    transform: translateY(-1px);
+}
+
+.cancelBtn {
+    background: transparent;
+    color: var(--text-muted);
+    border: 2px solid var(--border);
+}
+
+.cancelBtn:hover:not(:disabled) {
+    background: var(--bg-light);
+    color: var(--text);
+    border-color: var(--text-muted);
+}
+
+.saveBtn {
+    background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+    color: var(--text);
+    box-shadow: var(--shadow-primary);
+}
+
+.saveBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.saveBtn:disabled,
+.resetBtn:disabled,
+.cancelBtn:disabled,
+.deleteBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.saveBtn:disabled {
+    background: var(--border);
+    box-shadow: none;
+}
+
+.deleteBtn:disabled {
+    box-shadow: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .formActions {
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .leftActions,
+    .rightActions {
+        width: 100%;
+    }
+
+    .rightActions {
+        flex-direction: column;
+    }
+
+    .resetBtn,
+    .cancelBtn,
+    .saveBtn,
+    .deleteBtn {
+        flex: 1;
+        justify-content: center;
+    }
+}
