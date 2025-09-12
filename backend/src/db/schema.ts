@@ -20,6 +20,7 @@ export const superheroImages = pgTable('superhero_images', {
         onDelete: 'cascade'
     }).notNull(),
     imageUrl: varchar('image_url', { length: 500 }).notNull(),
+    imageType: varchar('image_type', { length: 20 }).default('url'),
     altText: varchar('alt_text', { length: 200 }),
     createdAt: timestamp('created_at').defaultNow().notNull(),
 });
