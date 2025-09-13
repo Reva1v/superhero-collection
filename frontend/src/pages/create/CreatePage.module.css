@@ -1,0 +1,128 @@
+.createPage {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: var(--spacing-lg);
+    background: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.formGroup label {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.formGroup input[type="text"],
+.formGroup textarea {
+    padding: var(--spacing-md);
+    border: 2px solid var(--border);
+    border-radius: var(--border-radius);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.formGroup input[type="text"]:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--border-focus)33;
+}
+
+.formGroup input[type="text"]::placeholder,
+.formGroup textarea::placeholder {
+    color: var(--text-light);
+}
+
+.formActions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: space-between;
+    margin-top: var(--spacing-lg);
+}
+
+.submitButton {
+    flex: 1;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+    color: var(--text);
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-primary);
+}
+
+.submitButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.submitButton:disabled {
+    background: var(--border);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.cancelBtn {
+    flex: 0 0 auto;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: transparent;
+    color: var(--text-muted);
+    border: 2px solid var(--border);
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancelBtn:hover:not(:disabled) {
+    background: var(--bg-light);
+    color: var(--text);
+    border-color: var(--text-muted);
+}
+
+.error {
+    background: linear-gradient(45deg, var(--danger), #e74c3c);
+    color: var(--text);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .createPage {
+        margin: var(--spacing-md);
+        padding: var(--spacing-md);
+    }
+
+    .formActions {
+        flex-direction: column;
+    }
+
+    .submitButton,
+    .cancelBtn {
+        flex: 1;
+    }
+}

@@ -1,0 +1,74 @@
+.section {
+    background: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-lg);
+    border: 2px solid var(--border);
+}
+
+.section h2 {
+    margin: 0 0 var(--spacing-lg) 0;
+    color: var(--text);
+    font-size: 1.4rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--border);
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.formGroup label {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.formGroup input[type="text"],
+.formGroup textarea {
+    padding: var(--spacing-md);
+    border: 2px solid var(--border);
+    border-radius: var(--border-radius);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    resize: vertical;
+}
+
+.formGroup input[type="text"]:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--border-focus)33;
+}
+
+.formGroup input[type="text"]:disabled,
+.formGroup textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.formGroup input[type="text"]::placeholder,
+.formGroup textarea::placeholder {
+    color: var(--text-light);
+}
+
+@media (max-width: 768px) {
+    .formRow {
+        grid-template-columns: 1fr;
+    }
+}
