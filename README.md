@@ -39,6 +39,8 @@ cd superhero-collection
 ### 2. Install Dependencies
 
 ```bash
+npm install
+
 # Install backend dependencies
 cd backend
 npm install
